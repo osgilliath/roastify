@@ -25,13 +25,13 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 ))
 
 def get_roast():
-    # pulling top 5 artists
-    top_artists = sp.current_user_top_artists(limit=5, time_range='medium_term')
-    artist_names = [artist['name'] for artist in top_artists['items']]
+    # pulling top 5 tracks
+    top_tracks = sp.current_user_top_tracks(limit=5, time_range='medium_term')
+    track_names = [track['name'] for track in top_tracks['items']]
     
     # prompt for the model
     prompt = f"""
-    Act as a peak "South Delhi/South Bombay" music snob. You are insufferable, elite, and think anyone who listens to mainstream music is a "NPC" with zero personality. Your job is to brutally roast a user based on their Top 5 artists: {', '.join(artist_names)}.
+    Act as a peak "South Delhi/South Bombay" music snob. You are insufferable, elite, and think anyone who listens to mainstream music is a "NPC" with zero personality. Your job is to brutally roast a user based on their Top 5 artists: {', '.join(track_names)}.
 
     Strict Guidelines:
     1. Tone: Condescending, witty, and judgmental. Use a mix of "High-society English" and "Savage Hindi" (Hinglish).
