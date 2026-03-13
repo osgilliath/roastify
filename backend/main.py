@@ -1,35 +1,50 @@
 import os
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+import httpx
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware 
 from google import genai
 from dotenv import load_dotenv
 
-# setting up api keys
+#loadting api keys
 load_dotenv()
 
-SPOTIPY_CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
-SPOTIPY_CLIENT_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET')
-SPOTIPY_REDIRECT_URI = os.getenv('SPOTIPY_REDIRECT_URI')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 
-# genai client
+#connecting genai client
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-# spotify auth
-scope = "user-top-read"
-sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
-    client_id=SPOTIPY_CLIENT_ID,
-    client_secret=SPOTIPY_CLIENT_SECRET,
-    redirect_uri=SPOTIPY_REDIRECT_URI,
-    scope=scope
-))
+#initiating fast api
+app = FastAPI()
 
-def get_roast():
-    # pulling top 5 tracks
-    top_tracks = sp.current_user_top_tracks(limit=5, time_range='medium_term')
-    track_names = [track['name'] for track in top_tracks['items']]
+#allowing frontend to connect with backend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+#initiating fast api
+@app.get("/roast")
+async def get_roast(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="No Spotify Token provided")
     
-    # prompt for the model
+    #fetching top artists
+    async with httpx.AsyncClient() as http_client:
+        spotify_res = await http_client.get(
+            "http://googleusercontent.com/api.spotify.com/v1/me/top/artists?limit=5",
+            headers={"Authorization": authorization}
+        )
+        
+        if spotify_res.status_code != 200:
+            raise HTTPException(status_code=400, detail="Failed to fetch Spotify data")
+        
+        data = spotify_res.json()
+        artists = [artist['name'] for artist in data['items']]
+
+    #generating roast
     prompt = f"""
     Act as a peak "South Delhi/South Bombay" music snob. You are insufferable, elite, and think anyone who listens to mainstream music is a "NPC" with zero personality. Your job is to brutally roast a user based on their Top 5 artists: {', '.join(track_names)}.
 
@@ -47,13 +62,15 @@ def get_roast():
     5. Length: Keep it under 400 words.
     6. Language: Use conversational Hinglish (e.g., "Yaar, please," "Have some standards," "Thoda toh original bano").
     """
-    
+
     response = client.models.generate_content(
         model='gemini-2.5-flash',
         contents=prompt
     )
-    print("\n THE ROAST! \n")
-    print(response.text)
+
+    return {"artists": artists, "roast": response.text}
 
 if __name__ == "__main__":
-    get_roast()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
