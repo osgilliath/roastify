@@ -3,7 +3,7 @@
 roastify is a musictaste roaster, this will basically take your spotify account and then roast your taste in music,
 it will take your top artists and tracks and will roast your taste accordingly
 
-Uvicorn server (hopefully) running on http://0.0.0.0:8000
+> Uvicorn server (hopefully) running on http://0.0.0.0:8000
 
 > Don't really know what is up with the frontend, so just uploading the code here in case it fks my system up
 
