@@ -1,10 +1,11 @@
-import { auth } from "@/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { Music } from "lucide-react";
 import Roaster from "@/components/roaster";
 import LoginButton from "@/components/LoginButton";
 
 export default async function Home() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#090909] text-white p-6 font-sans selection:bg-[#1DB954] selection:text-black">
