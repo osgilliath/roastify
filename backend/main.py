@@ -6,9 +6,12 @@ from google import genai
 from dotenv import load_dotenv
 
 #loadting api keys
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+load_dotenv() # Also check current directory
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY is not set in the environment")
 
 #connecting genai client
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -19,7 +22,7 @@ app = FastAPI()
 #allowing frontend to connect with backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:3000"],
+    allow_origins=["http://127.0.0.1:3000", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,19 +37,20 @@ async def get_roast(authorization: str = Header(None)):
     #fetching top artists
     async with httpx.AsyncClient() as http_client:
         spotify_res = await http_client.get(
-            "http://googleusercontent.com/api.spotify.com/v1/me/top/artists?limit=5",
+            "https://api.spotify.com/v1/me/top/artists?limit=5",
             headers={"Authorization": authorization}
         )
         
         if spotify_res.status_code != 200:
-            raise HTTPException(status_code=400, detail="Failed to fetch Spotify data")
+            print(f"Spotify API Error: {spotify_res.status_code} - {spotify_res.text}")
+            raise HTTPException(status_code=400, detail=f"Failed to fetch Spotify data: {spotify_res.text}")
         
         data = spotify_res.json()
         artists = [artist['name'] for artist in data['items']]
 
     #generating roast
     prompt = f"""
-    Act as a peak "South Delhi/South Bombay" music snob. You are insufferable, elite, and think anyone who listens to mainstream music is a "NPC" with zero personality. Your job is to brutally roast a user based on their Top 5 artists: {', '.join(track_names)}.
+    Act as a peak "South Delhi/South Bombay" music snob. You are insufferable, elite, and think anyone who listens to mainstream music is a "NPC" with zero personality. Your job is to brutally roast a user based on their Top 5 artists: {', '.join(artists)}.
 
     Strict Guidelines:
     1. Tone: Condescending, witty, and judgmental. Use a mix of "High-society English" and "Savage Hindi" (Hinglish).
