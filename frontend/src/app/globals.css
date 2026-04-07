@@ -1,26 +1,140 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=Fira+Code:wght@400;500&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+body {
+  background: #050505;
+  color: #e8e8e8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.w {
+  background: #050505;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  font-family: 'Outfit', sans-serif;
+  position: relative;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,80,0.012) 2px, rgba(0,255,80,0.012) 4px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 660px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.github-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid #1c2e1c;
+  background: #080808;
+  padding: 8px 12px;
+  color: #2e5e2e;
+  font-family: 'Fira Code', monospace;
+  font-size: 12px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.github-btn:hover {
+  border-color: #22c55e;
+  color: #22c55e;
+}
+
+/* Hides the text on very small screens, keeping just the icon */
+@media (max-width: 640px) {
+  .github-btn span {
+    display: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+.brand { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.logo-wrap { width: 56px; height: 56px; border-radius: 14px; background: #0d0d0d; border: 1px solid #1a3d1a; display: flex; align-items: center; justify-content: center; position: relative; }
+.logo-wrap svg { width: 28px; height: 28px; }
+.logo-dot { position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; animation: pulse 2s ease infinite; }
+
+h1 { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 3.4rem; line-height: 0.92; text-align: center; letter-spacing: -0.01em; }
+.w1 { color: #e8e8e8; display: block; }
+.w2 { color: #22c55e; display: block; letter-spacing: 0.04em; }
+
+.terminal { width: 100%; background: #080808; border: 1px solid #1c2e1c; border-radius: 12px; overflow: hidden; }
+.term-bar { background: #0f0f0f; border-bottom: 1px solid #1a2e1a; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot-r { background: #3d1010; }
+.dot-y { background: #3d3010; }
+.dot-g { background: #0f3d0f; }
+.term-title { font-family: 'Fira Code', monospace; font-size: 11px; color: #2e5e2e; margin-left: auto; margin-right: auto; letter-spacing: 0.06em; }
+.term-body { padding: 20px 20px 24px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; }
+
+.prompt-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 4px; }
+.prompt-sym { font-family: 'Fira Code', monospace; font-size: 13px; color: #22c55e; user-select: none; line-height: 1.6; flex-shrink: 0; }
+.prompt-cmd { font-family: 'Fira Code', monospace; font-size: 13px; color: #5ef07c; line-height: 1.6; }
+
+.cta-area { display: flex; justify-content: center; margin-top: 18px; }
+.btn-run { font-family: 'Fira Code', monospace; font-size: 12px; letter-spacing: 0.12em; color: #050505; background: #22c55e; border: none; border-radius: 8px; padding: 11px 28px; cursor: pointer; font-weight: 500; transition: transform 0.15s, background 0.15s; }
+.btn-run:hover { background: #16a34a; transform: scale(1.03); }
+
+.output-block { margin-top: 14px; }
+.out-line { font-family: 'Fira Code', monospace; font-size: 12px; line-height: 1.8; display: block; }
+.out-dim { color: #2e5e2e; }
+.out-main { color: #a3e8b0; white-space: pre-wrap; word-break: break-word; }
+.out-hi { color: #22c55e; }
+.out-err { color: #ef4444; }
+.out-warn { color: #fbbf24; }
+
+.spinner-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.sp { width: 14px; height: 14px; border: 2px solid #1a3d1a; border-top-color: #22c55e; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+.sp-text { font-family: 'Fira Code', monospace; font-size: 12px; color: #2e5e2e; animation: blink 1.4s step-end infinite; }
+
+.sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #0f1f0f; }
+.stat-card { background: #0a0a0a; border: 1px solid #1a2e1a; border-radius: 8px; padding: 10px 12px; }
+.stat-lbl { font-family: 'Fira Code', monospace; font-size: 10px; color: #2e5e2e; letter-spacing: 0.14em; margin-bottom: 6px; }
+.badge { display: inline-block; font-family: 'Fira Code', monospace; font-size: 11px; padding: 3px 10px; border-radius: 4px; background: #0d1f0d; color: #22c55e; border: 1px solid #1a3d1a; }
+
+.flames { display: flex; gap: 4px; align-items: center; }
+.flame { width: 12px; height: 14px; }
+.flame.on svg path { fill: #22c55e; }
+.flame.off svg path { fill: #1a2e1a; }
+.rating-num { font-family: 'Fira Code', monospace; font-size: 11px; color: #2e5e2e; margin-left: 4px; }
+
+.btn-again { font-family: 'Fira Code', monospace; font-size: 11px; color: #2e5e2e; background: transparent; border: 1px solid #1c2e1c; border-radius: 6px; padding: 7px 18px; cursor: pointer; margin-top: 18px; transition: color 0.15s, border-color 0.15s; }
+.btn-again:hover { color: #22c55e; border-color: #22c55e; }
+.again-row { display: flex; justify-content: center; }
+
+.cursor { display: inline-block; width: 7px; height: 13px; background: #22c55e; margin-left: 2px; animation: blink 0.9s step-end infinite; vertical-align: middle; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+@keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.anim { animation: fadein 0.4s ease both; }

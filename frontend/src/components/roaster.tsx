@@ -1,15 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Loader2, Sparkles, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
+
+const QUIPS = [
+  "analyzing your basic-ness...",
+  "diagnosing your disorder...",
+  "consulting the music gods...",
+  "processing your L's...",
+  "measuring cringe levels...",
+];
 
 export default function Roaster({ accessToken }: { accessToken: string }) {
   const [data, setData] = useState<{ roast: string; badge: string; rating: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isExpired, setIsExpired] = useState(false);
+  const [quipIndex, setQuipIndex] = useState(0);
 
   const generateRoast = async () => {
     setLoading(true);
@@ -17,18 +25,22 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
     setData(null);
     setIsExpired(false);
 
+    // Rotate quips while loading
+    let qi = 0;
+    const iv = setInterval(() => {
+      qi = (qi + 1) % QUIPS.length;
+      setQuipIndex(qi);
+    }, 900);
+
     try {
       const response = await fetch("http://127.0.0.1:8000/roast", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (response.status === 401) {
         setIsExpired(true);
         throw new Error("Spotify session expired. Please re-login.");
       }
-
       if (!response.ok) throw new Error("Backend is offline or failed to fetch roast");
 
       const result = await response.json();
@@ -36,107 +48,123 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
     } catch (err: any) {
       setError(err.message);
     } finally {
+      clearInterval(iv);
       setLoading(false);
     }
   };
 
-  return (
-    <div className="w-full flex flex-col items-center justify-center">
-      {!data && !loading && (
-        <button
-          onClick={generateRoast}
-          className="group relative bg-white text-black font-bold py-4 px-10 rounded-full text-xl transition-all hover:scale-105 active:scale-95 overflow-hidden"
-        >
-          <span className="relative z-10 flex items-center gap-2">
-            DO YOUR WORST <Flame size={20} className="group-hover:text-orange-500 transition-colors" />
-          </span>
-        </button>
-      )}
-
-      {loading && (
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="animate-spin text-[#1DB954]" size={40} />
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="font-mono text-gray-400 text-sm animate-pulse uppercase tracking-widest"
-          >
-            Analyzing your basic-ness...
-          </motion.p>
+  // ── ERROR STATE ──
+  if (error) {
+    return (
+      <div id="view-idle" className="anim">
+        <div className="prompt-row">
+          <span className="prompt-sym">❯</span>
+          <span className="prompt-cmd">roast --connect spotify --verdict harsh</span>
         </div>
-      )}
-
-      <AnimatePresence>
-        {data && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-left w-full space-y-6"
-          >
-            <div className="flex items-center gap-2 text-[#1DB954] font-mono text-xs font-bold uppercase tracking-widest border-b border-white/10 pb-2">
-              <Sparkles size={14} /> The Verdict
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="md:col-span-2 space-y-4">
-                <p className="text-lg md:text-xl font-medium leading-relaxed text-gray-100 italic">
-                  "{data.roast}"
-                </p>
-              </div>
-              
-              <div className="space-y-6 border-l border-white/10 pl-0 md:pl-8">
-                <div>
-                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Taste Badge</h3>
-                  <div className="inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-500 rounded-sm text-sm font-black uppercase italic">
-                    {data.badge}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-bold mb-2">Vibe Rating</h3>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Flame 
-                        key={star} 
-                        size={18} 
-                        className={star <= data.rating ? "text-orange-500 fill-orange-500" : "text-gray-800"} 
-                      />
-                    ))}
-                    <span className="ml-2 text-xs font-mono text-gray-400 self-center">
-                      {data.rating}/5
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-8 flex justify-center">
-              <button 
-                onClick={() => setData(null)}
-                className="text-sm text-gray-500 hover:text-white transition-colors border border-gray-600 hover:border-white rounded-full px-6 py-2"
-              >
-                Go again
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {error && (
-        <div className="flex flex-col items-center gap-4">
-          <p className="mt-4 text-red-400 font-mono text-xs bg-red-500/10 p-3 rounded-lg border border-red-500/20">
-            {error}
-          </p>
+        <div className="output-block mt-2 mb-4">
+          <span className="out-line out-err">error: {error}</span>
+        </div>
+        <div className="flex flex-col items-center gap-3">
           {isExpired && (
             <button
               onClick={() => signOut()}
-              className="flex items-center gap-2 text-sm text-white bg-red-500/20 hover:bg-red-500/40 border border-red-500/50 px-4 py-2 rounded-full transition-all"
+              className="btn-again flex items-center gap-2"
+              style={{ borderColor: "rgba(239,68,68,0.4)", color: "#ef4444" }}
             >
-              <LogOut size={14} /> Re-connect Spotify
+              <LogOut size={13} /> re-connect spotify
             </button>
           )}
+          <button className="btn-again" style={{ marginTop: 0 }} onClick={generateRoast}>
+            ↩ retry
+          </button>
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // ── LOADING STATE ──
+  if (loading) {
+    return (
+      <div id="view-loading">
+        <div className="prompt-row">
+          <span className="prompt-sym">❯</span>
+          <span className="prompt-cmd">roast --connect spotify --verdict harsh</span>
+        </div>
+        <div className="output-block">
+          <span className="out-line out-dim">// connecting to spotify api...</span>
+          <span className="out-line out-dim">// fetching top tracks &amp; artists...</span>
+          <div className="spinner-row">
+            <div className="sp"></div>
+            <span className="sp-text">{QUIPS[quipIndex]}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── VERDICT STATE ──
+  if (data) {
+    return (
+      <div id="view-verdict" className="anim">
+        <div className="prompt-row">
+          <span className="prompt-sym">❯</span>
+          <span className="prompt-cmd">roast --connect spotify --verdict harsh</span>
+        </div>
+        <div className="output-block">
+          <span className="out-line out-dim">// analysis complete. brace yourself.</span>
+          <span className="out-line out-dim">──────────────────────────────────────</span>
+          <span className="out-line out-main">&ldquo;{data.roast}&rdquo;</span>
+          <span className="out-line out-dim" style={{ marginTop: "8px" }}>
+            ──────────────────────────────────────
+          </span>
+          <span className="out-line" style={{ marginTop: "4px" }}>
+            <span className="out-dim">exit code </span>
+            <span className="out-err">{data.rating <= 2 ? "1" : "0"}</span>
+            <span className="out-dim">  // skill issue detected</span>
+          </span>
+        </div>
+        <div className="sidebar">
+          <div className="stat-card">
+            <div className="stat-lbl">// taste_badge</div>
+            <span className="badge">{data.badge}</span>
+          </div>
+          <div className="stat-card">
+            <div className="stat-lbl">// vibe_rating</div>
+            <div className="flames">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <span key={n} className={`flame ${n <= data.rating ? "on" : "off"}`}>
+                  <svg width="12" height="14" viewBox="0 0 12 14">
+                    <path d="M6 1C6 1 9.5 4.5 9.5 7.5C9.5 9.5 8 11 6 13C4 11 2.5 9.5 2.5 7.5C2.5 4.5 6 1 6 1Z" />
+                  </svg>
+                </span>
+              ))}
+              <span className="rating-num">{data.rating}/5</span>
+            </div>
+          </div>
+        </div>
+        <div className="again-row">
+          <button className="btn-again" onClick={() => setData(null)}>
+            ↩ roast --reset
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── IDLE STATE (Default) ──
+  return (
+    <div id="view-idle">
+      <div className="prompt-row">
+        <span className="prompt-sym">❯</span>
+        <span className="prompt-cmd">
+          roast --connect spotify --verdict harsh<span className="cursor"></span>
+        </span>
+      </div>
+      <div className="cta-area">
+        <button className="btn-run" onClick={generateRoast}>
+          [ RUN ]
+        </button>
+      </div>
     </div>
   );
 }
