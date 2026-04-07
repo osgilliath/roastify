@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -19,11 +19,16 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
   const [isExpired, setIsExpired] = useState(false);
   const [quipIndex, setQuipIndex] = useState(0);
 
+  // ── Typing Animation States ──
+  const [displayedRoast, setDisplayedRoast] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
   const generateRoast = async () => {
     setLoading(true);
     setError("");
     setData(null);
     setIsExpired(false);
+    setDisplayedRoast("");
 
     // Rotate quips while loading
     let qi = 0;
@@ -52,6 +57,29 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
       setLoading(false);
     }
   };
+
+  // ── Typing Effect Hook ──
+  useEffect(() => {
+    if (data?.roast) {
+      setIsTyping(true);
+      setDisplayedRoast("");
+      
+      let i = 0;
+      const text = data.roast;
+
+      const typingInterval = setInterval(() => {
+        setDisplayedRoast(text.slice(0, i + 1));
+        i++;
+        
+        if (i >= text.length) {
+          clearInterval(typingInterval);
+          setIsTyping(false);
+        }
+      }, 10); // Adjust this number (in milliseconds) to make the typing faster or slower
+
+      return () => clearInterval(typingInterval);
+    }
+  }, [data]);
 
   // ── ERROR STATE ──
   if (error) {
@@ -110,10 +138,16 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
           <span className="prompt-sym">❯</span>
           <span className="prompt-cmd">roast --connect spotify --verdict harsh</span>
         </div>
+        
         <div className="output-block">
           <span className="out-line out-dim">// analysis complete. brace yourself.</span>
           <span className="out-line out-dim">──────────────────────────────────────</span>
-          <span className="out-line out-main">&ldquo;{data.roast}&rdquo;</span>
+          
+          <span className="out-line out-main">
+            &ldquo;{displayedRoast}
+            {isTyping ? <span className="cursor" /> : <>&rdquo;</>}
+          </span>
+          
           <span className="out-line out-dim" style={{ marginTop: "8px" }}>
             ──────────────────────────────────────
           </span>
@@ -123,7 +157,8 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
             <span className="out-dim">  // skill issue detected</span>
           </span>
         </div>
-        <div className="sidebar">
+
+        <div className="sidebar" style={{ opacity: isTyping ? 0 : 1, transition: "opacity 0.4s ease" }}>
           <div className="stat-card">
             <div className="stat-lbl">// taste_badge</div>
             <span className="badge">{data.badge}</span>
@@ -142,7 +177,8 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
             </div>
           </div>
         </div>
-        <div className="again-row">
+
+        <div className="again-row" style={{ opacity: isTyping ? 0 : 1, transition: "opacity 0.4s ease", pointerEvents: isTyping ? "none" : "auto" }}>
           <button className="btn-again" onClick={() => setData(null)}>
             ↩ roast --reset
           </button>
