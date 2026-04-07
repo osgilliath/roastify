@@ -9,7 +9,7 @@ export default async function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#090909] text-white p-6 font-sans selection:bg-[#1DB954] selection:text-black">
-      <div className="text-center space-y-8 max-w-2xl w-full">
+      <div className="text-center space-y-8 max-w-4xl w-full">
         <div className="space-y-4">
           <div className="flex justify-center">
             <div className="p-4 bg-[#1DB954] rounded-2xl shadow-[0_0_30px_rgba(29,185,84,0.3)]">
