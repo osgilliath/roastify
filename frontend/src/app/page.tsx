@@ -45,7 +45,7 @@ export default async function Home() {
           </div>
           <div className="term-body" id="term-body">
             {session ? (
-              <Roaster accessToken={session.accessToken} />
+              <Roaster accessToken={session.accessToken as string} />
             ) : (
               <div id="view-idle">
                 <div className="prompt-row">
