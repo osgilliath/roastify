@@ -2,7 +2,13 @@
 
 roastify is a music taste roaster, this will basically take your spotify account and then roast your taste in music.
 
-Get roasted here:
+![demo](assets/demo.png)
+
+> [!NOTE]
+> Spotify apps can only be made by organizations now, not by individuals
+> So I can only access 5 users to use this site, as Dev mode only allows 5 users
+
+Hosted here:
 
 https://roastify-inky.vercel.app/
 
