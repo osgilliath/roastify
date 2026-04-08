@@ -38,7 +38,7 @@ export default function Roaster({ accessToken }: { accessToken: string }) {
     }, 900);
 
     try {
-      const response = await fetch("https://roastify-bb4t.onrender.com/roast", {
+      const response = await fetch("https://roastify-4h34.onrender.com/roast", {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
