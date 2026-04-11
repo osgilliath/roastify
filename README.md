@@ -2,7 +2,9 @@
 
 roastify is a music taste roaster, this will basically take your spotify account and then roast your taste in music.
 
-![demo](assets/Demovid.mp4)
+<p align="center" width="100%">
+<video src="assets/Demovid.mp4" width="80%" controls></video>
+</p>
 
 > [!NOTE]
 > Spotify apps can only be made by organizations now, not by individuals
