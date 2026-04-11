@@ -2,11 +2,11 @@
 
 roastify is a music taste roaster, this will basically take your spotify account and then roast your taste in music.
 
-![demo](assets/demo.png)
+![demo](assets/Demovid.mp4)
 
 > [!NOTE]
 > Spotify apps can only be made by organizations now, not by individuals
-> So I can only access 5 users to use this site, as Dev mode only allows 5 users
+> So I can only authorize 5 users to use this site, as Dev mode only allows 5 users
 
 Hosted here:
 
@@ -23,10 +23,9 @@ it will:
 
 ### working
 
-
 for the nerds out there:
 
-- backend is hosted on Render (it sleeps after 15 minutes of activity)
+- backend is hosted on Render (it sleeps after 15 minutes of inactivity)
 - frontend on vercel
 - fronted is designed in next js and tailwind css
 - backend is made with fastapi
